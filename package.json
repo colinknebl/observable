@@ -1,0 +1,28 @@
+{
+  "name": "observable",
+  "version": "0.0.0",
+  "description": "observable data types",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "tsc -p tsconfig.json --watch",
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/colinknebl/observable.git"
+  },
+  "keywords": [
+    "observable",
+    "subscribable"
+  ],
+  "author": "Colin Knebl",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/colinknebl/observable/issues"
+  },
+  "homepage": "https://github.com/colinknebl/observable#readme",
+  "devDependencies": {
+    "typescript": "^3.8.3"
+  }
+}
