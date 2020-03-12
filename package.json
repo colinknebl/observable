@@ -6,7 +6,7 @@
   "scripts": {
     "start": "tsc -p tsconfig.json --watch",
     "build": "tsc -p tsconfig.json",
-    "prepack": "npm run build"
+    "prepack": "npm install && npm run build"
   },
   "repository": {
     "type": "git",
