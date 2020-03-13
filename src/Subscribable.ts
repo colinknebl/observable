@@ -8,42 +8,42 @@ interface ISubscribable<T> {
 }
 
 class SubscribedObservers<T> {
-    private _observer: Observer<T>;
+    #observer: Observer<T>;
     public id: Symbol;
 
     constructor(observer: Observer<T>) {
         const id = Observe.getObserverId();
         this.id = Symbol(id);
-        this._observer = observer;
+        this.#observer = observer;
     }
 
     public next(nextValue: T) {
-        this._observer.next(nextValue);
+        this.#observer.next(nextValue);
     }
 
     public error(error: Error) {
-        this._observer.error(error);
+        this.#observer.error(error);
     }
 
     public complete() {
-        this._observer.complete();
+        this.#observer.complete();
     }
 }
 
 export class Subscribable<T> implements ISubscribable<T> {
 
-    private _observers: SubscribedObservers<T>[] = [];
-    private _currentValue: T | null;
+    #observers: SubscribedObservers<T>[] = [];
+    #currentValue: T | null;
 
     constructor(initialValue?: T) {
-        this._currentValue = initialValue || null;
+        this.#currentValue = initialValue || null;
     }
 
     /**
-     * Removes the observer with the passed in ID from this._observers array
+     * Removes the observer with the passed in ID from this.#observers array
      */
     private _removeSubscriber(id: Symbol) {
-        this._observers = this._observers.filter(observer => {
+        this.#observers = this.#observers.filter(observer => {
             if (observer.id !== id) {
                 return observer;
             }
@@ -70,7 +70,7 @@ export class Subscribable<T> implements ISubscribable<T> {
 
         const subscribedObserver = new SubscribedObservers(observer);
 
-        this._observers.push(subscribedObserver);
+        this.#observers.push(subscribedObserver);
         const subscription = new Subscription(() => this._removeSubscriber(subscribedObserver.id));
 
         observer.start(subscription);
@@ -79,10 +79,10 @@ export class Subscribable<T> implements ISubscribable<T> {
     }
 
     public next(nextValue: T): void {
-        this._currentValue = nextValue;
+        this.#currentValue = nextValue;
         if (nextValue instanceof Error) {
-            return this._observers.forEach(observer => observer.error(nextValue));
+            return this.#observers.forEach(observer => observer.error(nextValue));
         }
-        return this._observers.forEach(observer => observer.next(nextValue));
+        return this.#observers.forEach(observer => observer.next(nextValue));
     }
 }

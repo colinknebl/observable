@@ -14,30 +14,38 @@ export interface IObserverLike<T> {
     complete?: ObserverCompleteCallback;
 }
 
+export type ObserverCleanupFn = () => void;
 type ObserverNextCallback<T> = (value: T) => void;
 type ObserverStartCallback = (subscription: Subscription) => void;
 type ObserverErrorCallback = (error: Error) => void;
 type ObserverCompleteCallback = () => void;
 
 export class Observer<T> implements IObserverLike<T> {
-    private _next: ObserverNextCallback<T>;
-    private _start: ObserverStartCallback | undefined;
-    private _error: ObserverErrorCallback | undefined;
-    private _complete: ObserverCompleteCallback | undefined;
+
+    public static setCleanupCallback(observer: Observer<any>, cleanupCallbackFn: ObserverCleanupFn) {
+        observer.#cleanup = cleanupCallbackFn;
+    }
+
+    #next: ObserverNextCallback<T>;
+    #start: ObserverStartCallback | undefined;
+    #error: ObserverErrorCallback | undefined;
+    #complete: ObserverCompleteCallback | undefined;
+    #cleanup: ObserverCleanupFn | undefined;
+    #active: boolean = true;
 
     constructor(callbacks: IObserverLike<T>) {
-        this._next = callbacks.next;
-        this._start = callbacks.start;
-        this._error = callbacks.error;
-        this._complete = callbacks.complete;
+        this.#next = callbacks.next;
+        this.#start = callbacks.start;
+        this.#error = callbacks.error;
+        this.#complete = callbacks.complete;
     }
 
     public start(subscription: Subscription) {
-        this._start && this._start(subscription);
+        this.#start && this.#start(subscription);
     }
 
     public next(value: T) {
-        this._next(value);
+        this.#next(value);
     }
 
     public error(error: Error | string): void {
@@ -49,10 +57,13 @@ export class Observer<T> implements IObserverLike<T> {
         } else {
             passedError = new Error('Unknown observable error!');
         }
-        this._error && this._error(passedError);
+        this.#error && this.#error(passedError);
     }
 
     public complete() {
-        this._complete && this._complete();
+        if (!this.#active) return;
+        this.#complete && this.#complete();
+        this.#cleanup && this.#cleanup();
+        this.#active = false;
     }
 }

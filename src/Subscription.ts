@@ -1,5 +1,3 @@
-import { Subscribable } from './Subscribable';
-
 export type SubsriptionCleanupCallbackFn = () => void;
 
 interface ISubscription {
@@ -11,19 +9,20 @@ interface ISubscription {
 }
 
 export class Subscription implements ISubscription {
-    private _subscriptionCleanupFn: SubsriptionCleanupCallbackFn;
-    private _closed: boolean = false;
+    #subscriptionCleanupFn: SubsriptionCleanupCallbackFn | undefined;
+    #closed: boolean = false;
 
     constructor(subscriptionCleanupFn: SubsriptionCleanupCallbackFn) {
-        this._subscriptionCleanupFn = subscriptionCleanupFn;
+        this.#subscriptionCleanupFn = subscriptionCleanupFn;
     }
 
     get closed(): boolean {
-        return this._closed;
+        return this.#closed;
     }
 
     unsubscribe() {
-        this._subscriptionCleanupFn();
-        this._closed = true;
+        if (this.#closed) return;
+        this.#subscriptionCleanupFn && this.#subscriptionCleanupFn();
+        this.#closed = true;
     }
 }
