@@ -22,7 +22,7 @@ type ObserverCompleteCallback = () => void;
 
 export class Observer<T> implements IObserverLike<T> {
 
-    public static setCleanupCallback(observer: Observer<any>, cleanupCallbackFn: ObserverCleanupFn) {
+    public static setCleanupCallback(observer: Observer<any>, cleanupCallbackFn: ObserverCleanupFn): void {
         observer.#cleanup = cleanupCallbackFn;
     }
 
@@ -40,11 +40,11 @@ export class Observer<T> implements IObserverLike<T> {
         this.#complete = callbacks.complete;
     }
 
-    public start(subscription: Subscription) {
+    public start(subscription: Subscription): void {
         this.#start && this.#start(subscription);
     }
 
-    public next(value: T) {
+    public next(value: T): void {
         this.#next(value);
     }
 
@@ -60,7 +60,7 @@ export class Observer<T> implements IObserverLike<T> {
         this.#error && this.#error(passedError);
     }
 
-    public complete() {
+    public complete(): void {
         if (!this.#active) return;
         this.#complete && this.#complete();
         this.#cleanup && this.#cleanup();

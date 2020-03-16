@@ -3,7 +3,7 @@ import { Observe } from './Observe';
 import { IObserverLike, Observer } from './Observer';
 import { Subscription } from './Subscription';
 
-interface ISubscribable<T> {
+export interface ISubscribable<T> {
     subscribe(observerLike: IObserverLike<T>): Subscription;
 }
 
@@ -30,6 +30,8 @@ class SubscribedObservers<T> {
     }
 }
 
+type NextCallback<T> = (current: T) => T;
+
 export class Subscribable<T> implements ISubscribable<T> {
 
     #observers: SubscribedObservers<T>[] = [];
@@ -37,6 +39,10 @@ export class Subscribable<T> implements ISubscribable<T> {
 
     constructor(initialValue?: T) {
         this.#currentValue = initialValue || null;
+    }
+
+    public get value(): T {
+        return this.#currentValue as T;
     }
 
     /**
@@ -78,11 +84,15 @@ export class Subscribable<T> implements ISubscribable<T> {
         return subscription;
     }
 
-    public next(nextValue: T): void {
-        this.#currentValue = nextValue;
-        if (nextValue instanceof Error) {
-            return this.#observers.forEach(observer => observer.error(nextValue));
+    public next(next: T | NextCallback<T>): void {
+        if (typeof next === 'function') {
+            this.#currentValue = (next as NextCallback<T>)(this.#currentValue as T);
+        } else {
+            this.#currentValue = next;
         }
-        return this.#observers.forEach(observer => observer.next(nextValue));
+        if (this.#currentValue instanceof Error) {
+            return this.#observers.forEach(observer => observer.error(this.#currentValue as unknown as Error));
+        }
+        return this.#observers.forEach(observer => observer.next(this.#currentValue as T));
     }
 }

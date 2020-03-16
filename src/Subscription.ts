@@ -16,11 +16,11 @@ export class Subscription implements ISubscription {
         this.#subscriptionCleanupFn = subscriptionCleanupFn;
     }
 
-    get closed(): boolean {
+    public get closed(): boolean {
         return this.#closed;
     }
 
-    unsubscribe() {
+    public unsubscribe(): void {
         if (this.#closed) return;
         this.#subscriptionCleanupFn && this.#subscriptionCleanupFn();
         this.#closed = true;
