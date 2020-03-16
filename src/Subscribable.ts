@@ -5,6 +5,7 @@ import { Subscription } from './Subscription';
 
 export interface ISubscribable<T> {
     subscribe(observerLike: IObserverLike<T>): Subscription;
+    readonly value: T;
 }
 
 class SubscribedObservers<T> {
