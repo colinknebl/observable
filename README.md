@@ -12,6 +12,7 @@ observers are notified of the change.
 ```ts
 interface ISubscribable<T> {
     subscribe(observerLike: IObserverLike<T>): Subscription;
+    readonly value: T;
 }
 
 type NextCallback<T> = (current: T) => T;
@@ -20,7 +21,7 @@ export class Subscribable<T> implements ISubscribable<T> {
     constructor(initialValue?: T);
 
     // returns the current subscribable value
-    readonly value(): T;
+    public get value(): T;
 
     // subscribe to changes
     public subscribe(observerLike: IObserverLike<T>, options?: { observer: Observer<T> }): Subscription;
