@@ -1,4 +1,4 @@
-import { Observe } from './Observe';
+import { Provider } from './Provider';
 
 import { IObserverLike, Observer } from './Observer';
 import { Subscription } from './Subscription';
@@ -13,7 +13,7 @@ class SubscribedObservers<T> {
     public id: Symbol;
 
     constructor(observer: Observer<T>) {
-        const id = Observe.getObserverId();
+        const id = Provider.getObserverId();
         this.id = Symbol(id);
         this.#observer = observer;
     }
@@ -36,10 +36,10 @@ type NextCallback<T> = (current: T) => T;
 export class Subscribable<T> implements ISubscribable<T> {
 
     #observers: SubscribedObservers<T>[] = [];
-    #currentValue: T | null;
+    #currentValue: T | this;
 
     constructor(initialValue?: T) {
-        this.#currentValue = initialValue || null;
+        this.#currentValue = initialValue ?? this;
     }
 
     public get value(): T {
@@ -85,8 +85,10 @@ export class Subscribable<T> implements ISubscribable<T> {
         return subscription;
     }
 
-    public next(next: T | NextCallback<T>): void {
-        if (typeof next === 'function') {
+    public next(next?: T | NextCallback<T>): void {
+        if (!next) {
+            this.#currentValue = this;
+        } else if (typeof next === 'function') {
             this.#currentValue = (next as NextCallback<T>)(this.#currentValue as T);
         } else {
             this.#currentValue = next;
